@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="http://localhost:8080/socket.io/socket.io.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/styles/styles.css">
+        <link rel="stylesheet" type="text/css" href="http://localhost:8888/sock-finder-mongolian/css/styles.css">
+        <script>
+            var socket = io.connect('http://localhost:8080');
+            
+            //listeners
+            //possibly update a list of events on the page for confirmation
+            socket.on('updatelog', function(clickId) {
+                //                var d = new Date();
+                //                $('#logevents').append(clickId + ' was pressed at ' + d.toString() + '<br />');
+
+                //fancier timestamp repeating
+                var date = new Date();
+                format_date(date, clickId);
+               
+            })
+            
+            function format_date (date, clickId) {
+                // date can be in msec or in a format recognized by Date.parse()
+                var d = new Date(date); 
+	
+                var days_of_week = Array('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+                var day_of_week = days_of_week[d.getDay()];
+	
+                var year = d.getFullYear();
+                var months = Array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
+                var month = months[d.getMonth()];
+                var day = d.getDate();
+	
+                var hour = d.getHours();
+                var minute = d.getMinutes();
+                var am_pm = 'am';
+
+                if(hour == 0) { 
+                    hour = 12; 
+                } else if (hour == 12) { 
+                    am_pm = 'pm'; 
+                } else if (hour > 12) { 
+                    hour -= 12; 
+                    am_pm = 'pm';
+                }
+                if(minute < 10) { minute = '0'+minute; }
+	
+                var date_formatted = day_of_week+' '+month+' '+day+' '+year+' '+hour+':'+minute+am_pm;
+                //console.log(date_formatted);
+                $('#logevents').append(clickId + ' was clicked at ' + date_formatted + '<br />');
+            }
+            
+            //on load of page
+            $(function() {
+                //when the client clicks on a button grab the div id, tell server to execute sendEvent and send the div id
+                $('button').click( function() {
+                    var clickId = $(this).attr("id");
+                    console.log(clickId);
+                    socket.emit('sendEvent', clickId)
+                })
+            })
+            
+            
+        </script>
+    </head>
+    <body>
+        <div>
+            <h3>Sock Finder - Using Mongolian</h3>
+            <h5>Press a sample button:</h5>
+            <button id="button1">Button 1</button>
+            <button id="button2">Button 2</button>
+            <button id="button3">Button 3</button>
+            <div id="logevents"><br><br>Logging Events from the server:<br></div>
+
+        </div>
+    </body>
+</html>
